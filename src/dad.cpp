@@ -3,6 +3,7 @@
 #include "camera.h"
 #include "system.h"
 #include "scancode.h"
+#include "endScene.h"
 #include "son.h"
 
 #include "dad.h"
@@ -149,8 +150,6 @@ Dad::emitMyLove_(int form)
 	}
 }
 
-#include "titleScene.h"
-
 void
 Dad::getHit_()
 {
@@ -162,7 +161,7 @@ Dad::getHit_()
 		if (currentForm_ + 1 < kTotalFormNum)
 			currentForm_++;
 		else /* You won */
-			System::gameScene().swapScene<TitleScene>();
+			System::gameScene().swapScene<EndScene>();
 
 		dadsTalk_.play(-1, 0);
 		lifePoint_ = kMaxHp;

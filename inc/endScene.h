@@ -14,6 +14,12 @@ public:
 	virtual void update();
 	virtual void render();
 private:
+	Texture noDadTex_, youreAManTex_, buTex_, noTex_, finTex_, notFinTex_,
+		okMonTex_, noOneTex_, realFinTex_;
+
+	AudioChunk noDadSe_, youreAManSe_, buSe_, noSe_, finSe_, notFinSe_,
+		okMonSe_, noOneSe_, realFinSe_;
+
 	int currentPage_;
 };
 

@@ -2,7 +2,6 @@
 #include <SDL.h>
 
 #include "scancode.h"
-#include "stageScene.h"
 #include "titleScene.h"
 
 #include "game.h"
