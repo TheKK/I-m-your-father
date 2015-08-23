@@ -31,8 +31,9 @@ IntroScene::IntroScene():
 	dadFormOneSe_("./asset/sound/dadFormOne.ogg"),
 	ahhSe_("./asset/sound/ahh.ogg"),
 	youHaveToDieSe_("./asset/sound/youHaveToDie.ogg"),
-	currentPage_(-1)
+	currentPage_(0)
 {
+	birdTweetSe_.play(0, 0);
 }
 
 void
@@ -43,9 +44,6 @@ IntroScene::update()
 		currentPage_++;
 
 		switch (currentPage_) {
-		case 0:
-			birdTweetSe_.play(0, 0);
-			break;
 		case 1:
 			whyYouHereSe_.play(0, 0);
 			break;
@@ -87,8 +85,6 @@ IntroScene::render()
 	System::rendering().renderClear();
 
 	switch (currentPage_) {
-	case -1:
-		break;
 	case 0:
 		houseTex_.render();
 		break;
