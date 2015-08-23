@@ -5,6 +5,7 @@
 #include "iGameScene.h"
 #include "texture.h"
 #include "audioChunk.h"
+#include "animatedSprite.h"
 
 class EndScene : public IGameScene
 {
@@ -16,6 +17,8 @@ public:
 private:
 	Texture noDadTex_, youreAManTex_, buTex_, noTex_, finTex_, notFinTex_,
 		okMonTex_, noOneTex_, realFinTex_;
+
+	AnimatedSprite pressButton_;
 
 	AudioChunk noDadSe_, youreAManSe_, buSe_, noSe_, finSe_, notFinSe_,
 		okMonSe_, noOneSe_, realFinSe_;

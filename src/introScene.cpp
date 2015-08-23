@@ -8,6 +8,8 @@
 namespace
 {
 	const Rect kWindowRect = {0, 0, 500, 500};
+
+	const Rect kPressButtonDest = {440, 470, 50, 20};
 }
 
 IntroScene::IntroScene():
@@ -20,6 +22,8 @@ IntroScene::IntroScene():
 	dadsFormOneTex_("./asset/image/dadsFormOne.png", kWindowRect),
 	dadsFormTwoTex_("./asset/image/dadsFormTwo.png", kWindowRect),
 	dadsFinalFormTex_("./asset/image/dadsFianlForm.png", kWindowRect),
+	manualTex_("./asset/image/manual.png", kWindowRect),
+	pressButton_("./asset/image/pressButton.png", {0, 0, 50, 20}, 2, 10),
 	birdTweetSe_("./asset/sound/birdTweet.ogg"),
 	whyYouHereSe_("./asset/sound/whyYouHere.ogg"),
 	imSorrySe_("./asset/sound/imSorry.ogg"),
@@ -76,6 +80,8 @@ IntroScene::update()
 			break;
 		}
 	}
+
+	pressButton_.update();
 }
 
 void
@@ -118,10 +124,16 @@ IntroScene::render()
 	case 10:
 		dadsFinalFormTex_.render();
 		break;
+	case 11:
+		manualTex_.render();
+		break;
 	default:
 		System::gameScene().swapScene<StageScene>();
 		break;
 	}
+
+	if (!System::audio().channelPlaying(0))
+		pressButton_.render(kPressButtonDest);
 
 	System::rendering().renderPresent();
 }

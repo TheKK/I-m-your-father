@@ -5,6 +5,7 @@
 #include "iGameScene.h"
 #include "texture.h"
 #include "audioChunk.h"
+#include "animatedSprite.h"
 
 class IntroScene : public IGameScene
 {
@@ -16,7 +17,9 @@ public:
 private:
 	Texture houseTex_, roomTex_, dadsWorryFaceTex_, sonsAngerTex_,
 		dadsSadFaceTex_, sonsQuestionFaceTex_, dadsFormOneTex_,
-		dadsFormTwoTex_, dadsFinalFormTex_;
+		dadsFormTwoTex_, dadsFinalFormTex_, manualTex_;
+
+	AnimatedSprite pressButton_;
 
 	AudioChunk birdTweetSe_, whyYouHereSe_, imSorrySe_, youMonsterSe_,
 		   whatYouSaidSe_, iSaidAgainSe_, howDidYouKnowSe_,
