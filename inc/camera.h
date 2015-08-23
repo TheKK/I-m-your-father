@@ -27,6 +27,7 @@ public:
 	int getBottom() const;
 
 	Rect& getViewRect() { return viewRect_; }
+	Rect& getWorldRect() { return worldRect_; }
 private:
 	Rect worldRect_;
 	Rect viewRect_;

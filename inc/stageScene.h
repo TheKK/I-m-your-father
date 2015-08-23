@@ -7,7 +7,9 @@
 
 #include "iGameScene.h"
 #include "camera.h"
+#include "texture.h"
 #include "son.h"
+#include "dad.h"
 #include "tiledMap.h"
 
 class StageScene : public IGameScene
@@ -20,7 +22,9 @@ public:
 private:
 	Camera camera_;
 	TiledMap map_;
+	Texture bgTex_;
 	Son son_;
+	Dad dad_;
 	std::list<IGameObject*> objectList_;
 };
 

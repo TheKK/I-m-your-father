@@ -3,11 +3,12 @@ CXX_FLAGS := -g -std=c++11
 
 LIBS := `pkg-config --libs sdl2 SDL2_image SDL2_mixer jsoncpp`
 CXX_FLAGS += `pkg-config --cflags sdl2 SDL2_image SDL2_mixer jsoncpp` -std=c++11
-CXX_FLAGS += -I inc
+CXX_FLAGS += -I inc -I jsoncpp
 
 EM_CXX := ~/Programs/emsdk_portable/emscripten/tag-1.34.3/em++
-EM_CXX_FLAGS := -s USE_SDL=2 -s USE_SDL_IMAGE=2 -I inc -std=c++11 -s ASM_JS=1 \
-	--preload-file bg.png --preload-file se.ogg -g4
+EM_CXX_FLAGS := -I inc -I jsoncpp/include
+EM_CXX_FLAGS += -s USE_SDL=2 -s USE_SDL_IMAGE=2 -std=c++11 -s ASM_JS=1 -O3 \
+	--preload-file ./asset
 
 OUT_DIR := out
 SRC_DIR := src
@@ -18,6 +19,9 @@ SRCS := $(wildcard $(SRC_DIR)/*)
 INCS := $(wildcard $(INC_DIR)/*)
 OBJS := $(addprefix $(OUT_DIR)/, $(SRCS:.cpp=.o))
 BCS := $(addprefix $(OUT_DIR)/, $(SRCS:.cpp=.bc))
+
+JSONCPP_SRCS := $(wildcard ./jsoncpp/src/lib_json/*.cpp)
+BCS += $(addprefix $(OUT_DIR)/, $(JSONCPP_SRCS:.cpp=.bc))
 
 OUT_EXE := ld33
 OUT_WEBPAGE := ld33.html

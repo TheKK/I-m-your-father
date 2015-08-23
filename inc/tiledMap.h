@@ -4,7 +4,12 @@
 #include <string>
 #include <list>
 #include <map>
+
+#ifdef __EMSCRIPTEN__
+#include "json/json.h"
+#else
 #include <json/json.h>
+#endif
 
 #include "texture.h"
 

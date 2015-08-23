@@ -3,11 +3,13 @@
 #pragma once
 
 #include <vector>
+#include <list>
 #include <map>
 
 #include "texture.h"
 #include "rect.h"
 #include "animatedSprite.h"
+#include "audioChunk.h"
 
 #include "iGameObject.h"
 #include "iCollidable.h"
@@ -22,42 +24,47 @@ public:
 	virtual void update();
 	virtual void render(Camera& camera);
 
-	void addCollide(ICollidable& object);
+	void setPos(int x, int y) { posX_ = x; posY_ = y; }
 
-	void setPos(int x, int y);
+	std::list<Rect> getMyLoves();
+	void takeDadsLoves(std::list<Rect> loves);
 
-	bool isOnGround() const { return isOnGround_; };
-private:
-	enum class State
-	{
-		Standing,
-		Walking,
-		Jumpping,
-		Attacking
-	};
-
-	Texture sonTexture_;
-	AnimatedSprite sonWalk_;
-	AnimatedSprite sonStand_;
-	AnimatedSprite sonJump_;
-	AnimatedSprite sonAttack_;;
-	AnimatedSprite* currentSprite_;
-	std::map<State, AnimatedSprite*> animatedSprites_;
+	int getLife() { return lifePoint_; }
 
 	Rect posRect_;
-	State currentState_;
-
 	float posX_, posY_;
-	float velX_, velY_;
-	float accX_, accY_;
+private:
+	struct Love {
+		Rect posRect;
+		float floatCounter;
+	};
 
-	bool isOnGround_;
+	Texture loveTexture_;
+	Texture sonsLife_;
+	AnimatedSprite sonSprite_;
+	AnimatedSprite sonWalkRight_;
+	AnimatedSprite sonWalkLeft_;
 
-	std::vector<ICollidable*> collides_;
+	AnimatedSprite* currentSprite_;
 
-	void updateX_(ICollidable& collidable);
-	void updateY_(ICollidable& collidable);
-	void checkWallAround_(ICollidable& collidable);
+	AudioChunk getHitSe_;
+	AudioChunk loveEmitSe_;
+
+	int jummping_;
+
+	int lifePoint_;
+
+	int reloadCount_;
+	int rehitCount_;
+	int lotsOfLove_;
+
+	std::list<Love> myLoves_;
+
+	void emitMyLove_();
+	void getHit_();
+	bool isOnGround_();
+	void renderChargeBar_();
+	void renderSonsLife_();
 };
 
 #endif /* SON_H */

@@ -23,6 +23,7 @@ public:
 	virtual int renderPresent();
 
 	virtual void renderRect(int x, int y, int w, int h);
+	virtual void renderFillRect(int x, int y, int w, int h);
 
 	virtual void setLogicalRenderSize(int w, int h);
 	virtual void getLogicalRenderSize(int* w, int* h);

@@ -13,15 +13,19 @@
 
 StageScene::StageScene():
 	camera_(500, 500, CAMERA_W, CAMERA_HI),
-	map_("asset/map/home.json")
+	map_("asset/map/home.json"),
+	bgTex_("./asset/image/stageBg.png", {0, 0, 500, 500})
 {
 	Rect sonStartPos = map_.getObjectPos("sonStartPoint");
+	Rect dadStartPos = map_.getObjectPos("dadStartPoint");
 
 	camera_.setWorldSize(map_.getPixelWidth(),
 			     map_.getPixelHeight());
 
 	son_.setPos(sonStartPos.x, sonStartPos.y);
-	son_.addCollide(map_);
+	dad_.setPos(dadStartPos.x, dadStartPos.y);
+
+	dad_.setSon(&son_);
 }
 
 void
@@ -45,8 +49,12 @@ StageScene::update()
 	for (auto& e : objectList_)
 		e->update();
 
-	map_.update();
+	//map_.update();
 	son_.update();
+	dad_.update();
+
+	son_.takeDadsLoves(dad_.getMyLoves());
+	dad_.takeSonsLove(son_.getMyLoves());
 }
 
 void
@@ -64,8 +72,10 @@ StageScene::render()
 	for (auto& e : objectList_)
 		e->render(camera_);
 
-	map_.render(camera_);
+	//map_.render(camera_);
+	bgTex_.render();
 	son_.render(camera_);
+	dad_.render(camera_);
 
 	rendering.setRenderDrawColor(0xff, 0x22, 0x14, 0x00);
 	rendering.renderRect(x / 500. * CAMERA_W, y / 500. * CAMERA_HI,

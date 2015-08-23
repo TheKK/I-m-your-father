@@ -100,6 +100,19 @@ SDLRenderingSubsystem::renderRect(int x, int y, int w, int h)
 }
 
 void
+SDLRenderingSubsystem::renderFillRect(int x, int y, int w, int h)
+{
+	static SDL_Rect rect;
+
+	rect.x = x;
+	rect.y = y;
+	rect.w = w;
+	rect.h = h;
+
+	SDL_RenderFillRect(renderer_, &rect);
+}
+
+void
 SDLRenderingSubsystem::setLogicalRenderSize(int w, int h)
 {
 	SDL_RenderSetLogicalSize(renderer_, w, h);

@@ -3,130 +3,123 @@
 #include "camera.h"
 #include "system.h"
 #include "scancode.h"
+#include "gameOverScene.h"
 
 #include "son.h"
 
 namespace
 {
-	int kSonWidth = 32;
-	int kSonHeight = 32;
+	const int kSonWidth = 16;
+	const int kSonHeight = 32;
+	const float kSonSpeed = 2;
 
-	int kCollideWidth = 16;
-	int kCollideHeight = 32;
+	const int kReloadFrame = 300;
+	const int kRehitFrame = 30;
 
-	float kJumpAcc = -2.0;
+	const int kLoveWidth = 16;
+	const int kLoveHeight = 16;
+	const float kLoveSpeed = -2;
+	const int kMaxLoveCount = 60;
+
+	const int kLifeWidth = 16;
+	const int kLifeHeight = 16;
+	const int kLifeStartX = 0;
+	const int kLifeStartY = 16 * 19;
+
+	const int kJumpFrame = 15;
+	const int kJumpSpeed = -3;
 }
 
 Son::Son():
-	sonTexture_("asset/image/son.png", {0, 0, kSonWidth, kSonHeight}),
-	sonWalk_("./asset/image/son_walk.png", {0, 0, kSonWidth, kSonHeight},
-		 4, 5),
-	sonStand_("./asset/image/son_stand.png", {0, 0, kSonWidth, kSonHeight},
-		 13, 5),
-	sonJump_("./asset/image/son_jump.png", {0, 0, kSonWidth, kSonHeight},
-		 3, 5),
-	sonAttack_("./asset/image/son_attack.png", {0, 0, kSonWidth, kSonHeight},
-		 9, 5)
+	loveTexture_("./asset/image/love.png", {0, 0, kLoveWidth, kLoveHeight}),
+	sonsLife_("./asset/image/sons_life.png", {0, 0, kSonWidth, kSonHeight}),
+	sonSprite_("./asset/image/son.png", {0, 0, kSonWidth, kSonHeight}, 8, 5),
+	sonWalkRight_("./asset/image/son_walk_right.png", {0, 0, kSonWidth, kSonHeight}, 4, 5),
+	sonWalkLeft_("./asset/image/son_walk_left.png", {0, 0, kSonWidth, kSonHeight}, 4, 5),
+	getHitSe_("./asset/sound/sonHit1.ogg"),
+	loveEmitSe_("./asset/sound/sonEmitLove.ogg"),
+	jummping_(0),
+	lifePoint_(5),
+	reloadCount_(kReloadFrame),
+	rehitCount_(0),
+	lotsOfLove_(0)
 {
 	posRect_.x = 0;
 	posRect_.y = 0;
-	posRect_.w = 32;
-	posRect_.h = 32;
+	posRect_.w = kSonWidth;
+	posRect_.h = kSonHeight;
 
-	animatedSprites_.emplace(State::Walking, &sonWalk_);
-	animatedSprites_.emplace(State::Standing, &sonStand_);
-	animatedSprites_.emplace(State::Jumpping, &sonJump_);
-	animatedSprites_.emplace(State::Attacking, &sonAttack_);
-
-	currentSprite_ = &sonStand_;
-	currentState_ = State::Standing;
+	currentSprite_ =  &sonSprite_;
 }
 
 void
 Son::update()
 {
-	/* Gravity */
-	accY_ = 0.1;
+	if (reloadCount_)
+		reloadCount_--;
 
-	switch (currentState_) {
-	case State::Standing:
-		if (System::event().getKeyState(Scancode::LEFT)) {
-			velX_ = -2;
-			currentState_ = State::Walking;
-			currentSprite_ = animatedSprites_[currentState_];
-		} else if (System::event().getKeyState(Scancode::RIGHT)) {
-			velX_ = 2;
-			currentState_ = State::Walking;
-			currentSprite_ = animatedSprites_[currentState_];
-		} else {
-			velX_ = 0;
-		}
+	if (rehitCount_)
+		rehitCount_--;
 
-		if (System::event().keyIsPressed(Scancode::Z)) {
-			accY_ += kJumpAcc;
-			currentState_ = State::Jumpping;
-			currentSprite_ = animatedSprites_[currentState_];
-		} else if (System::event().keyIsPressed(Scancode::X)) {
-			currentState_ = State::Attacking;
-			currentSprite_ = animatedSprites_[currentState_];
-			currentSprite_->setFrame(0);
-		}
-		break;
-
-	case State::Jumpping:
-		if (isOnGround_)
-			currentState_ = State::Standing;
-			currentSprite_ = animatedSprites_[currentState_];
-		break;
-
-	case State::Walking:
-		if (System::event().getKeyState(Scancode::LEFT)) {
-			velX_ = -2;
-		} else if (System::event().getKeyState(Scancode::RIGHT)) {
-			velX_ = 2;
-		} else {
-			velX_ = 0;
-			currentState_ = State::Standing;
-			currentSprite_ = animatedSprites_[currentState_];
-		}
-
-		if (System::event().keyIsPressed(Scancode::Z)) {
-			accY_ += kJumpAcc;
-			currentState_ = State::Jumpping;
-			currentSprite_ = animatedSprites_[currentState_];
-		} else if (System::event().keyIsPressed(Scancode::X)) {
-			currentState_ = State::Attacking;
-			currentSprite_ = animatedSprites_[currentState_];
-			currentSprite_->setFrame(0);
-		}
-		break;
-
-	case State::Attacking:
-		static int frameCounter = 45;
-		if (frameCounter == 0) {
-			currentState_ = State::Standing;
-			currentSprite_ = animatedSprites_[currentState_];
-			frameCounter = 45;
-		} else {
-			--frameCounter;
-		}
-		break;
-
-	default:
-		break;
+	if (jummping_) {
+		jummping_--;
+		posY_ += kJumpSpeed;
+	} else {
+		posY_ -= kJumpSpeed;
 	}
 
-	velX_ += accX_;
-	velY_ += accY_;
-
-	for (auto& e : collides_) {
-		updateX_(*e);
-		updateY_(*e);
-		checkWallAround_(*e);
+	if (lotsOfLove_) {
+		lotsOfLove_--;
+		emitMyLove_();
 	}
 
-	posX_ += velX_;
-	posY_ += velY_;
+	if (System::event().keyIsPressed(Scancode::X)) {
+		if (reloadCount_ == 0) {
+			reloadCount_ = kReloadFrame;
+			lotsOfLove_ = kMaxLoveCount;
+		}
+	}
+
+	if (System::event().keyIsPressed(Scancode::Z)) {
+		if ((jummping_ == 0) && isOnGround_())
+			jummping_ = kJumpFrame;
+	}
+
+	/* Change to walking animated sprite */
+	if (System::event().keyIsPressed(Scancode::LEFT))
+		currentSprite_ = &sonWalkLeft_;
+	if (System::event().keyIsPressed(Scancode::RIGHT))
+		currentSprite_ = &sonWalkRight_;
+
+	/* Change to standing animation sprite */
+	if (System::event().keyIsUnpressed(Scancode::LEFT))
+		currentSprite_ = &sonSprite_;
+	if (System::event().keyIsUnpressed(Scancode::RIGHT))
+		currentSprite_ = &sonSprite_;
+
+	if (System::event().getKeyState(Scancode::RIGHT))
+		posX_ += kSonSpeed;
+	if (System::event().getKeyState(Scancode::LEFT))
+		posX_ -= kSonSpeed;
+
+	/* Simple collide */
+	posX_ = std::min(std::max((int) posX_, 16), 16 * 19 - kSonWidth);
+	posY_ = std::min(std::max((int) posY_, 16), 16 * 19 - kSonHeight);
+
+	for (auto& e : myLoves_) {
+		e.floatCounter += 0.1;
+		e.posRect.y += kLoveSpeed;
+	}
+
+	myLoves_.remove_if(
+		[](Love& love)
+		   {
+			   static Rect worldRect = {0, 0, 16 * 20, 16 * 20};
+			   return !hasIntersection(love.posRect, worldRect);
+		   });
+
+	if (lifePoint_ == 0)
+		System::gameScene().swapScene<GameOverScene>();
 
 	if (currentSprite_)
 		currentSprite_->update();
@@ -137,6 +130,15 @@ Son::render(Camera& camera)
 {
 	static Rect drawDest;
 
+	drawDest.w = kLoveWidth;
+	drawDest.h = kLoveHeight;
+
+	for (auto& e : myLoves_) {
+		drawDest.x = e.posRect.x - camera.getLeft() + sin(e.floatCounter) * 10;
+		drawDest.y = e.posRect.y - camera.getTop();
+		loveTexture_.render(drawDest);
+	}
+
 	drawDest.x = posX_ - camera.getLeft();
 	drawDest.y = posY_ - camera.getTop();
 	drawDest.w = posRect_.w;
@@ -144,183 +146,96 @@ Son::render(Camera& camera)
 
 	if (currentSprite_)
 		currentSprite_->render(drawDest);
+
+	renderSonsLife_();
+	renderChargeBar_();
+}
+
+std::list<Rect>
+Son::getMyLoves()
+{
+	std::list<Rect> loves;
+
+	for (auto& e : myLoves_)
+		loves.push_back(e.posRect);
+
+	return loves;
 }
 
 void
-Son::addCollide(ICollidable& object)
+Son::takeDadsLoves(std::list<Rect> loves)
 {
-	collides_.push_back(&object);
-}
+	/* Not now */
+	if (rehitCount_)
+		return;
 
-void
-Son::setPos(int x, int y)
-{
-	posX_ = x;
-	posY_ = y;
-}
+	posRect_.x = posX_;
+	posRect_.y = posY_;
 
-void
-Son::updateX_(ICollidable& collidable)
-{
-	Rect colliedRect;
-	std::vector<Rect> tiles;
-
-	if (velX_ > 0.f) {
-		/* Test right part first */
-		colliedRect.x = std::round(posX_ + kCollideWidth / 2 + velX_);
-		colliedRect.y = std::round(posY_);
-		colliedRect.w = std::round(kCollideWidth / 2);
-		colliedRect.h = std::round(kCollideHeight);
-
-		tiles = collidable.getCollideRects(colliedRect);
-
-		for (const Rect& tile : tiles) {
-			if (hasIntersection(tile, colliedRect)) {
-				velX_ = 0.f;
-				accX_ = 0.f;
-				posX_ = tile.x - kCollideWidth;
-			}
-		}
-
-		/* Test left then */
-		colliedRect.x = std::round(posX_ + velX_);
-		colliedRect.y = std::round(posY_);
-		colliedRect.w = std::round(kCollideWidth / 2);
-		colliedRect.h = std::round(kCollideHeight);
-
-		tiles = collidable.getCollideRects(colliedRect);
-
-		for (const Rect& tile : tiles) {
-			if (hasIntersection(tile, colliedRect)) {
-				velX_ = 0.0f;
-				accX_ = 0.0f;
-				posX_ = tile.x + tile.w;
-			}
-		}
-	} else if (velX_ < 0) {
-		/* Test left part first */
-		colliedRect.x = std::round(posX_ + velX_);
-		colliedRect.y = std::round(posY_);
-		colliedRect.w = std::round(kCollideWidth / 2);
-		colliedRect.h = std::round(kCollideHeight);
-
-		tiles = collidable.getCollideRects(colliedRect);
-
-		for (const Rect& tile : tiles) {
-			if (hasIntersection(tile, colliedRect)) {
-				velX_ = 0.0f;
-				accX_ = 0.0f;
-				posX_ = tile.x + tile.w;
-			}
-		}
-
-		/* Test right part then */
-		colliedRect.x = std::round(posX_ + kCollideWidth / 2 + velX_);
-		colliedRect.y = std::round(posY_);
-		colliedRect.w = std::round(kCollideWidth / 2);
-		colliedRect.h = std::round(kCollideHeight);
-
-		tiles = collidable.getCollideRects(colliedRect);
-
-		for (const Rect& tile : tiles) {
-			if (hasIntersection(tile, colliedRect)) {
-				velX_ = 0.f;
-				accX_ = 0.f;
-				posX_ = tile.x - kCollideWidth;
-			}
+	for (auto& love : loves) {
+		if (hasIntersection(posRect_, love)) {
+			getHit_();
+			return;
 		}
 	}
 }
 
 void
-Son::updateY_(ICollidable& collidable)
+Son::emitMyLove_()
 {
-	std::vector<Rect> tiles;
-	Rect colliedRect;
+	Love love;
 
-	if (velY_ > 0.f) {
-		/* Test botton part first */
-		colliedRect.x = std::round(posX_);
-		colliedRect.y = std::round(posY_ + kCollideHeight / 2 + velY_);
-		colliedRect.w = std::round(kCollideWidth);
-		colliedRect.h = std::round(kCollideHeight / 2);
+	loveEmitSe_.play(-1, 0);
 
-		tiles = collidable.getCollideRects(colliedRect);
+	love.posRect = {(int) posX_, (int) posY_, kLoveWidth, kLoveHeight};
+	love.floatCounter = 0;
 
-		for (const Rect& tile : tiles) {
-			if (hasIntersection(tile, colliedRect)) {
-				velY_ = 0.f;
-				accY_ = 0.f;
-				posY_ = tile.y - kCollideHeight;
-			}
-		}
-
-		/* Test top part then */
-		colliedRect.x = std::round(posX_);
-		colliedRect.y = std::round(posY_ + velY_);
-		colliedRect.w = std::round(kCollideWidth);
-		colliedRect.h = std::round(kCollideHeight / 2);
-
-		tiles = collidable.getCollideRects(colliedRect);
-
-		for (const Rect& tile : tiles) {
-			if (hasIntersection(tile, colliedRect)) {
-				velY_ = 0.f;
-				accY_ = 0.f;
-				posY_ = tile.y + tile.h;
-			}
-		}
-	} else if (velY_ < 0.f) {
-		/* Test top part first */
-		colliedRect.x = std::round(posX_);
-		colliedRect.y = std::round(posY_ + velY_);
-		colliedRect.w = std::round(kCollideWidth);
-		colliedRect.h = std::round(kCollideHeight / 2);
-
-		tiles = collidable.getCollideRects(colliedRect);
-
-		for (const Rect& tile : tiles) {
-			if (hasIntersection(tile, colliedRect)) {
-				velY_ = 0.f;
-				accY_ = 0.f;
-				posY_ = tile.y + tile.h;
-			}
-		}
-
-		/* Test botton part then */
-		colliedRect.x = std::round(posX_);
-		colliedRect.y = std::round(posY_ + kCollideHeight / 2 + velY_);
-		colliedRect.w = std::round(kCollideWidth);
-		colliedRect.h = std::round(kCollideHeight / 2);
-
-		tiles = collidable.getCollideRects(colliedRect);
-
-		for (const Rect& tile : tiles) {
-			if (hasIntersection(tile, colliedRect)) {
-				velY_ = 0.f;
-				accY_ = 0.f;
-				posY_ = tile.y - kCollideHeight;
-			}
-		}
-	}
+	myLoves_.push_front(love);
 }
 
+void
+Son::getHit_()
+{
+	getHitSe_.play(-1, 0);
+	rehitCount_ = kRehitFrame;
+	lifePoint_--;
+}
+
+bool
+Son::isOnGround_()
+{
+	return ((int) posY_ >= 16 * 19 - kSonHeight);
+}
 
 void
-Son::checkWallAround_(ICollidable& collidable)
+Son::renderChargeBar_()
 {
-	std::vector<Rect> tiles;
-	Rect colliedRect;
+	System::rendering().setRenderDrawColor(0xcc, 0xcc, 0xcc, 0xff);
+	System::rendering().renderFillRect(
+		(int) posX_, (int) (posY_ + kSonHeight),
+		kSonWidth,
+		5);
 
-	/* Check if standing on floor */
-	colliedRect.x = std::round(posX_);
-	colliedRect.y = std::round(posY_ + kCollideHeight / 2) + 1;
-	colliedRect.w = std::round(kCollideWidth);
-	colliedRect.h = std::round(kCollideHeight / 2);
-
-	tiles = collidable.getCollideRects(colliedRect);
-	if (tiles.size() > 0)
-		isOnGround_ = true;
+	if (reloadCount_)
+		System::rendering().setRenderDrawColor(0x00, 0xff, 0x11, 0xff);
 	else
-		isOnGround_ = false;
+		System::rendering().setRenderDrawColor(0x11, 0x11, 0xff, 0xff);
+
+	System::rendering().renderFillRect(
+		(int) posX_, (int) (posY_ + kSonHeight),
+		kSonWidth * (kReloadFrame -  reloadCount_) / kReloadFrame,
+		5);
+
+}
+
+void
+Son::renderSonsLife_()
+{
+	static Rect lifeDest = {0, kLifeStartY, kLifeWidth, kLifeHeight};
+
+	for (int i = 0; i < lifePoint_; ++i) {
+		lifeDest.x = kLifeStartX + kLifeWidth * i;
+
+		sonsLife_.render(lifeDest);
+	}
 }

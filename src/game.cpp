@@ -3,12 +3,13 @@
 
 #include "scancode.h"
 #include "stageScene.h"
+#include "titleScene.h"
 
 #include "game.h"
 
 Game::Game()
 {
-	System::gameScene().pushScene<StageScene>();
+	System::gameScene().pushScene<TitleScene>();
 	gameScene_ = System::gameScene().topScene();
 }
 
