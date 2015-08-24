@@ -17,7 +17,7 @@ public:
 private:
 	Texture houseTex_, roomTex_, dadsWorryFaceTex_, sonsAngerTex_,
 		dadsSadFaceTex_, sonsQuestionFaceTex_, dadsFormOneTex_,
-		dadsFormTwoTex_, dadsFinalFormTex_, manualTex_;
+		dadsFormTwoTex_, dadsFinalFormTex_;
 
 	AnimatedSprite pressButton_;
 

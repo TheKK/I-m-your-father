@@ -1,4 +1,4 @@
-#include "titleScene.h"
+#include "manualScene.h"
 #include "scancode.h"
 #include "system.h"
 
@@ -19,7 +19,7 @@ void
 GameOverScene::update()
 {
 	if (!System::audio().channelPlaying(0))
-		System::gameScene().swapScene<TitleScene>();
+		System::gameScene().swapScene<ManualScene>();
 }
 
 void
