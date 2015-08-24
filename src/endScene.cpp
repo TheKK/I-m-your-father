@@ -22,7 +22,7 @@ EndScene::EndScene():
 	okMonTex_("./asset/image/okMon.png", kWindowRect),
 	noOneTex_("./asset/image/noOne.png", kWindowRect),
 	realFinTex_("./asset/image/realFin.png", kWindowRect),
-	pressButton_("./asset/image/pressButton.png", {0, 0, 50, 20}, 2, 10),
+	pressButton_("./asset/image/pressButton1.png", {0, 0, 50, 20}, 2, 10),
 	noDadSe_("./asset/sound/noDad.ogg"),
 	youreAManSe_("./asset/sound/youreAMan.ogg"),
 	buSe_("./asset/sound/bu.ogg"),

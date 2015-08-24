@@ -60,11 +60,7 @@ StageScene::update()
 void
 StageScene::render()
 {
-	static int x, y;
-	static IEventSubsystem& event = System::event();
 	static IRenderingSubsystem& rendering = System::rendering();
-
-	event.getMousePosition(&x, &y);
 
 	rendering.setRenderDrawColor(0xcc, 0xcc, 0xcc, 0x00);
 	rendering.renderClear();
@@ -76,10 +72,6 @@ StageScene::render()
 	bgTex_.render();
 	son_.render(camera_);
 	dad_.render(camera_);
-
-	rendering.setRenderDrawColor(0xff, 0x22, 0x14, 0x00);
-	rendering.renderRect(x / 500. * CAMERA_W, y / 500. * CAMERA_HI,
-			     25, 25);
 
 	rendering.renderPresent();
 }
